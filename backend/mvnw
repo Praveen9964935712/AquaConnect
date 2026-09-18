@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+
+if [ -d "$HOME/.m2/wrapper/dists" ]; then
+  echo "Maven wrapper not generated. Use 'mvn spring-boot:run' or run the wrapper setup command instead." >&2
+  exit 1
+fi
+
+exec mvn "$@"

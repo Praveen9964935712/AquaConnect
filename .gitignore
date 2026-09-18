@@ -1,0 +1,12 @@
+# Java and Maven build output
+backend/target/
+*.class
+
+# Local environment and IDE files
+.env
+.env.*
+.idea/
+*.iml
+
+# Packaged local artifacts
+backend-spring.zip
