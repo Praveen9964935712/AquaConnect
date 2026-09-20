@@ -1,0 +1,13 @@
+package com.aquaconnect.backend.enums;
+
+public enum NotificationType {
+    INCIDENT_CREATED,
+    INCIDENT_VERIFIED,
+    WORK_ORDER_ASSIGNED,
+    WORK_STARTED,
+    REPAIR_COMPLETED,
+    INCIDENT_RESOLVED,
+    INCIDENT_REOPENED,
+    INCIDENT_CLOSED,
+    AUTHORITY_REJECTED
+}
