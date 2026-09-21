@@ -58,6 +58,9 @@ public class Incident {
     @Column(name = "description", nullable = false, length = 2000)
     private String description;
 
+    @Column(name = "caller_identifier", length = 100)
+    private String callerIdentifier;
+
     @DecimalMin("-90.0")
     @DecimalMax("90.0")
     @Column(name = "latitude", precision = 9, scale = 6)
@@ -136,6 +139,7 @@ public class Incident {
     public IncidentSource getSource() { return source; }
     public IncidentCategory getCategory() { return category; }
     public String getDescription() { return description; }
+    public String getCallerIdentifier() { return callerIdentifier; }
     public BigDecimal getLatitude() { return latitude; }
     public BigDecimal getLongitude() { return longitude; }
     public LocationSource getLocationSource() { return locationSource; }
@@ -148,4 +152,5 @@ public class Incident {
 
     public void setStatus(IncidentStatus status) { this.status = status; }
     public void setPriority(IncidentPriority priority) { this.priority = priority; }
+    public void setCallerIdentifier(String callerIdentifier) { this.callerIdentifier = callerIdentifier; }
 }

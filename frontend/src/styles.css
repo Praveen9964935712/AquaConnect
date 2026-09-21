@@ -1,0 +1,168 @@
+:root {
+  font-family: Inter, system-ui, sans-serif;
+  color: #0f172a;
+  background: #f8fafc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #e0f2fe, #f8fafc);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+textarea {
+  min-height: 6rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  resize: vertical;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.metric strong {
+  font-size: 2rem;
+}
+
+.list,
+.status-list,
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.status-list {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.status-list span {
+  padding: 0.5rem 0.75rem;
+  background: #e0f2fe;
+  border-radius: 6px;
+}
+
+.list-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.work-order {
+  width: 100%;
+  text-align: left;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .nav {
+    flex-wrap: wrap;
+  }
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: #0f172a;
+  color: white;
+}
+
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nav a,
+.nav button {
+  color: white;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.page-shell {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  padding: 2rem;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+input {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+}
+
+button {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+}
+
+.error {
+  margin: 0;
+  color: #b91c1c;
+}

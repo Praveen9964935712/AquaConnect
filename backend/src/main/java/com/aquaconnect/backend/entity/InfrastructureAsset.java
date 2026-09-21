@@ -6,6 +6,10 @@ import java.util.UUID;
 
 import com.aquaconnect.backend.enums.InfrastructureAssetType;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import org.locationtech.jts.geom.Point;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -49,8 +53,9 @@ public class InfrastructureAsset {
     @Column(name = "longitude", precision = 10, scale = 7)
     private BigDecimal longitude;
 
-    @Column(name = "geom")
-    private String geom;
+    @JdbcTypeCode(SqlTypes.GEOMETRY)
+    @Column(name = "geom", columnDefinition = "geometry(Point,4326)")
+    private Point geom;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "zone_id", foreignKey = @ForeignKey(name = "fk_infrastructure_assets_zone"))
@@ -96,7 +101,7 @@ public class InfrastructureAsset {
     public String getDescription() { return description; }
     public BigDecimal getLatitude() { return latitude; }
     public BigDecimal getLongitude() { return longitude; }
-    public String getGeom() { return geom; }
+    public Point getGeom() { return geom; }
     public WaterZone getZone() { return zone; }
     public boolean isActive() { return active; }
     public Instant getCreatedAt() { return createdAt; }

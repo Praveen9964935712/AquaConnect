@@ -46,6 +46,25 @@ public class IncidentService {
         return IncidentResponse.from(incidentRepository.save(incident));
     }
 
+    @Transactional
+    public IncidentResponse createForIvr(String callerIdentifier, IncidentCreateRequest request) {
+        if (request.source() != null && request.source() != IncidentSource.IVR) {
+            throw new IllegalArgumentException("IVR incidents must use the IVR source");
+        }
+        Incident incident = new Incident(null, IncidentSource.IVR, request.category(), request.description().trim(),
+                request.latitude(), request.longitude(),
+                request.locationSource() == null ? LocationSource.UNKNOWN : request.locationSource(),
+                request.locationAccuracy());
+        incident.setCallerIdentifier(callerIdentifier);
+        return IncidentResponse.from(incidentRepository.save(incident));
+    }
+
+    @Transactional(readOnly = true)
+    public List<IncidentResponse> findForIvrCaller(String callerIdentifier) {
+        return incidentRepository.findByCallerIdentifierOrderByCreatedAtDesc(callerIdentifier).stream()
+                .map(IncidentResponse::from).toList();
+    }
+
     @Transactional(readOnly = true)
     public List<IncidentResponse> findAllForCitizen(UUID citizenId) {
         return incidentRepository.findByCitizenIdOrderByCreatedAtDesc(citizenId).stream()
