@@ -20,7 +20,7 @@ AquaConnect/
 
 ## Backend
 
-The backend is a Spring Boot Maven application generated with :
+The backend is a Spring Boot Maven application generated with : 
 
 - Java 21
 - Spring Boot 3.5.5
