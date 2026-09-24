@@ -11,7 +11,7 @@ AquaConnect/
 │   ├── pom.xml
 │   ├── mvnw
 │   ├── mvnw.cmd
-│   └── ...
+│   └── .... 
 │
 ├── frontend/
 ├── database/
