@@ -18,6 +18,6 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, UUID> {
 
     long countByStatus(com.aquaconnect.backend.enums.WorkOrderStatus status);
 
-    @org.springframework.data.jpa.repository.Query("select avg(extract(epoch from (w.completedAt - w.createdAt))) from WorkOrder w where w.completedAt is not null")
+    @org.springframework.data.jpa.repository.Query("select avg(extract(epoch from w.completedAt) - extract(epoch from w.createdAt)) from WorkOrder w where w.completedAt is not null")
     Double averageCompletionSeconds();
 }

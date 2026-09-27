@@ -35,13 +35,12 @@ class IvrSessionServiceTest {
         sessionId = UUID.randomUUID();
         session = mock(IvrSession.class);
         when(repository.findById(sessionId)).thenReturn(java.util.Optional.of(session));
-        when(repository.save(session)).thenReturn(session);
-        when(session.getId()).thenReturn(sessionId);
-        when(session.getState()).thenReturn(IvrSessionState.START);
     }
 
     @Test
     void languageSelectionMovesSessionToMainMenu() {
+        when(session.getState()).thenReturn(IvrSessionState.START);
+        when(repository.save(session)).thenReturn(session);
         service.selectLanguage(sessionId, new IvrLanguageRequest(IvrLanguage.ENGLISH));
         verify(session).selectLanguage(IvrLanguage.ENGLISH);
     }
@@ -49,6 +48,7 @@ class IvrSessionServiceTest {
     @Test
     void menuOneSelectsReportProblem() {
         when(session.getState()).thenReturn(IvrSessionState.MAIN_MENU);
+        when(repository.save(session)).thenReturn(session);
         service.menu(sessionId, 1);
         verify(session).chooseReport();
     }
@@ -56,6 +56,7 @@ class IvrSessionServiceTest {
     @Test
     void menuFourEscalatesToOperator() {
         when(session.getState()).thenReturn(IvrSessionState.MAIN_MENU);
+        when(repository.save(session)).thenReturn(session);
         service.menu(sessionId, 4);
         verify(session).chooseOperator();
     }
@@ -63,6 +64,7 @@ class IvrSessionServiceTest {
     @Test
     void menuNineRepeatsMenu() {
         when(session.getState()).thenReturn(IvrSessionState.MAIN_MENU);
+        when(repository.save(session)).thenReturn(session);
         service.menu(sessionId, 9);
         verify(session).repeatMenu();
     }
@@ -76,6 +78,7 @@ class IvrSessionServiceTest {
     @Test
     void detailsAreAcceptedOnlyAfterReportSelection() {
         when(session.getState()).thenReturn(IvrSessionState.REPORT_PROBLEM);
+        when(repository.save(session)).thenReturn(session);
         service.details(sessionId, new IvrDetailsRequest(IncidentCategory.PIPE_LEAK, "Leak near station"));
         verify(session).details(IncidentCategory.PIPE_LEAK, "Leak near station");
     }

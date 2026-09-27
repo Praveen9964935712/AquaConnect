@@ -38,13 +38,25 @@ class AnalyticsServiceTest {
     @Test
     void aggregatesRepresentativeOperationalData() {
         when(incidentRepository.countByStatus(IncidentStatus.SUBMITTED)).thenReturn(2L);
+        when(incidentRepository.countByStatus(IncidentStatus.UNDER_VERIFICATION)).thenReturn(1L);
+        when(incidentRepository.countByStatus(IncidentStatus.VERIFIED)).thenReturn(1L);
+        when(incidentRepository.countByStatus(IncidentStatus.ASSIGNED)).thenReturn(0L);
+        when(incidentRepository.countByStatus(IncidentStatus.IN_PROGRESS)).thenReturn(0L);
+        when(incidentRepository.countByStatus(IncidentStatus.REPAIR_COMPLETED)).thenReturn(0L);
+        when(incidentRepository.countByStatus(IncidentStatus.AUTHORITY_VERIFICATION)).thenReturn(0L);
         when(incidentRepository.countByStatus(IncidentStatus.RESOLVED)).thenReturn(1L);
         when(incidentRepository.countByStatus(IncidentStatus.CLOSED)).thenReturn(3L);
+        when(incidentRepository.countByStatus(IncidentStatus.REOPENED)).thenReturn(0L);
         when(incidentRepository.countOpen(Set.of(IncidentStatus.CLOSED))).thenReturn(3L);
+        when(workOrderRepository.countByStatus(WorkOrderStatus.CREATED)).thenReturn(0L);
+        when(workOrderRepository.countByStatus(WorkOrderStatus.ASSIGNED)).thenReturn(0L);
+        when(workOrderRepository.countByStatus(WorkOrderStatus.ACCEPTED)).thenReturn(0L);
+        when(workOrderRepository.countByStatus(WorkOrderStatus.IN_PROGRESS)).thenReturn(0L);
         when(workOrderRepository.countByStatus(WorkOrderStatus.COMPLETED)).thenReturn(4L);
+        when(workOrderRepository.countByStatus(WorkOrderStatus.CANCELLED)).thenReturn(0L);
         when(workOrderRepository.averageCompletionSeconds()).thenReturn(3600.0);
         var result = service.overview();
-        assertThat(result.totalIncidents()).isEqualTo(6L);
+        assertThat(result.totalIncidents()).isEqualTo(8L);
         assertThat(result.resolvedIncidents()).isEqualTo(1L);
         assertThat(result.closedIncidents()).isEqualTo(3L);
         assertThat(result.workOrdersByStatus()).containsEntry("COMPLETED", 4L);

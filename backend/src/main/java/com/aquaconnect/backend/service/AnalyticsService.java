@@ -40,8 +40,12 @@ public class AnalyticsService {
         long closed = status.getOrDefault(IncidentStatus.CLOSED.name(), 0L);
         long reopened = status.getOrDefault(IncidentStatus.REOPENED.name(), 0L);
         long open = incidentRepository.countOpen(java.util.Set.of(IncidentStatus.CLOSED));
+        Double averageCompletionSeconds = workOrderRepository.averageCompletionSeconds();
+        if (workOrders.getOrDefault(WorkOrderStatus.COMPLETED.name(), 0L) == 0L && (averageCompletionSeconds == null || averageCompletionSeconds == 0.0)) {
+            averageCompletionSeconds = null;
+        }
         return new AnalyticsResponse(total, open, resolved, closed, reopened, status, priority, category, source,
-                workOrders, workOrderRepository.averageCompletionSeconds());
+                workOrders, averageCompletionSeconds);
     }
 
     private <E extends Enum<E>> Map<String, Long> counts(E[] values, java.util.function.ToLongFunction<E> counter) {
