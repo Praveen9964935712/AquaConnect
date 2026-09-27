@@ -1,5 +1,6 @@
 package com.aquaconnect.backend.repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,4 +25,6 @@ public interface IncidentRepository extends JpaRepository<Incident, UUID> {
 
     @Query("select count(i) from Incident i where i.status not in :closedStatuses")
     long countOpen(@Param("closedStatuses") java.util.Collection<com.aquaconnect.backend.enums.IncidentStatus> closedStatuses);
+
+    List<Incident> findAllByCreatedAtAfterOrderByCreatedAtAsc(Instant createdAt);
 }

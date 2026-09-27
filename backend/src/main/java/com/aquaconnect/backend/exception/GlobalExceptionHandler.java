@@ -68,6 +68,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(Map.of("error", "Invalid request data"));
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalState() {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "Invalid request state"));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidation() {
         return ResponseEntity.badRequest().body(Map.of("error", "Invalid request data"));

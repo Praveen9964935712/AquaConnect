@@ -76,6 +76,34 @@ class AuthControllerIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    void invalidTokenAndForbiddenRequestsReturnStructuredSecurityErrors() throws Exception {
+        mockMvc.perform(get("/api/manager/dashboard")
+                        .header("Authorization", "Bearer not-a-valid-jwt"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("Authentication required"));
+
+        String email = uniqueEmail();
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(registerJson(email, "Citizen password 1")))
+                .andExpect(status().isCreated());
+
+        String token = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson(email, "Citizen password 1")))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String bearerToken = token.replaceAll(".*\"token\"\\s*:\\s*\"([^\"]+)\".*", "$1");
+        mockMvc.perform(get("/api/admin/users")
+                        .header("Authorization", "Bearer " + bearerToken))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("Access denied"));
+    }
+
     private static String uniqueEmail() {
         return "phase6-" + UUID.randomUUID() + "@example.com";
     }

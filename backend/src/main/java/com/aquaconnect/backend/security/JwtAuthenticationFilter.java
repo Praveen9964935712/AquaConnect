@@ -44,6 +44,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (!jwtService.isValid(token)) {
             SecurityContextHolder.clearContext();
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write("{\"error\":\"Authentication required\"}");
+            response.getWriter().flush();
             return;
         }
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
