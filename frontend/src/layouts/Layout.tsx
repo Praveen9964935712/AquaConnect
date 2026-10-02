@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { dashboardPath } from '../auth/dashboardPath';
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { isAuthenticated, logout, user } = useAuth();
@@ -8,7 +9,10 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <div className="brand">AquaConnect</div>
+        <NavLink className="brand" to={user ? dashboardPath(user.roles) : '/login'} aria-label="AquaConnect home">
+          <span className="brand-mark" aria-hidden="true">~</span>
+          <span>AquaConnect</span>
+        </NavLink>
         <nav className="nav">
           {!isAuthenticated ? (
             <>
@@ -17,12 +21,14 @@ export default function Layout({ children }: { children: ReactNode }) {
             </>
           ) : (
             <>
-              {user?.roles.includes('CITIZEN') && <NavLink to="/citizen">Citizen</NavLink>}
-              {user?.roles.includes('OPERATOR') && <NavLink to="/operator">Operator</NavLink>}
-              {user?.roles.includes('OPERATIONS_MANAGER') && <NavLink to="/manager">Manager</NavLink>}
+              {user?.roles.includes('CITIZEN') && <NavLink to="/citizen">My service</NavLink>}
+              {user?.roles.includes('OPERATOR') && <NavLink to="/operator">Operations</NavLink>}
+              {user?.roles.includes('OPERATIONS_MANAGER') && <NavLink to="/manager">Management</NavLink>}
               {user?.roles.includes('FIELD_ENGINEER') && <NavLink to="/engineer">Field work</NavLink>}
-              {user?.roles.includes('ADMIN') && <NavLink to="/admin">Admin</NavLink>}
-              <button type="button" onClick={logout}>Logout</button>
+              {user?.roles.includes('ADMIN') && <NavLink to="/admin">Administration</NavLink>}
+              {user?.roles.includes('OPERATOR') && <NavLink to="/ivr-simulator">IVR simulator</NavLink>}
+              <span className="user-chip">{user?.email}</span>
+              <button className="nav-logout" type="button" onClick={logout}>Sign out</button>
             </>
           )}
         </nav>

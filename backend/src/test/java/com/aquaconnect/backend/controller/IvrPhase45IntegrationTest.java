@@ -21,6 +21,7 @@ import com.aquaconnect.backend.entity.Role;
 import com.aquaconnect.backend.entity.User;
 import com.aquaconnect.backend.entity.UserRole;
 import com.aquaconnect.backend.enums.RoleName;
+import com.aquaconnect.backend.repository.IvrSessionRepository;
 import com.aquaconnect.backend.repository.RoleRepository;
 import com.aquaconnect.backend.repository.UserRepository;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -44,6 +45,9 @@ class IvrPhase45IntegrationTest {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private IvrSessionRepository ivrSessionRepository;
 
     @Test
     void publicIvrGatewayRejectsInvalidTrustAndCrossCallerAccess() throws Exception {
@@ -80,6 +84,56 @@ class IvrPhase45IntegrationTest {
                         .header("X-IVR-Trust", "dev-ivr-test-token")
                         .header("X-IVR-Caller-Id", "other-caller"))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void publicIvrGatewayUsesTrustedCallerWhenBodyCallerIsOmitted() throws Exception {
+        String callerId = "caller-p45-" + UUID.randomUUID();
+
+        MvcResult result = mockMvc.perform(post("/api/ivr/gateway/sessions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}")
+                        .header("X-IVR-Trust", "dev-ivr-test-token")
+                        .header("X-IVR-Caller-Id", callerId))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String sessionId = objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asText();
+        assertThat(ivrSessionRepository.findById(UUID.fromString(sessionId)).orElseThrow().getCallerIdentifier())
+                .isEqualTo(callerId);
+    }
+
+    @Test
+    void publicIvrGatewayAcceptsBodyCallerWhenItMatchesTrustedCaller() throws Exception {
+        String callerId = "caller-p45-" + UUID.randomUUID();
+
+        MvcResult result = mockMvc.perform(post("/api/ivr/gateway/sessions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"callerIdentifier\":\"" + callerId + "\"}")
+                        .header("X-IVR-Trust", "dev-ivr-test-token")
+                        .header("X-IVR-Caller-Id", callerId))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String sessionId = objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asText();
+        assertThat(ivrSessionRepository.findById(UUID.fromString(sessionId)).orElseThrow().getCallerIdentifier())
+                .isEqualTo(callerId);
+    }
+
+    @Test
+    void publicIvrGatewayRejectsBodyCallerThatDiffersFromTrustedCaller() throws Exception {
+        String trustedCaller = "trusted-p45-" + UUID.randomUUID();
+        String attackerCaller = "attacker-p45-" + UUID.randomUUID();
+
+        mockMvc.perform(post("/api/ivr/gateway/sessions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"callerIdentifier\":\"" + attackerCaller + "\"}")
+                        .header("X-IVR-Trust", "dev-ivr-test-token")
+                        .header("X-IVR-Caller-Id", trustedCaller))
+                .andExpect(status().isBadRequest());
+
+        assertThat(ivrSessionRepository.findByCallerIdentifierOrderByCreatedAtDesc(attackerCaller)).isEmpty();
+        assertThat(ivrSessionRepository.findByCallerIdentifierOrderByCreatedAtDesc(trustedCaller)).isEmpty();
     }
 
     @Test
@@ -183,10 +237,25 @@ class IvrPhase45IntegrationTest {
                         .header("X-IVR-Trust", "dev-ivr-test-token")
                         .header("X-IVR-Caller-Id", callerId)
                         .param("language", "ENGLISH")
+                        .param("reason", "   "))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(post("/api/ivr/gateway/sessions/{id}/escalate", sessionId)
+                        .header("X-IVR-Trust", "dev-ivr-test-token")
+                        .header("X-IVR-Caller-Id", callerId)
+                        .param("language", "ENGLISH")
+                        .param("reason", "x".repeat(1001)))
+                .andExpect(status().isBadRequest());
+
+        MvcResult escalationResult = mockMvc.perform(post("/api/ivr/gateway/sessions/{id}/escalate", sessionId)
+                        .header("X-IVR-Trust", "dev-ivr-test-token")
+                        .header("X-IVR-Caller-Id", callerId)
+                        .param("language", "ENGLISH")
                         .param("reason", "Need a live operator."))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.callerIdentifier").value(callerId))
-                .andExpect(jsonPath("$.status").value("QUEUED"));
+                .andExpect(jsonPath("$.status").value("QUEUED"))
+                .andReturn();
 
         mockMvc.perform(post("/api/ivr/gateway/sessions/{id}/escalate", sessionId)
                         .header("X-IVR-Trust", "dev-ivr-test-token")
@@ -201,6 +270,16 @@ class IvrPhase45IntegrationTest {
                         .param("language", "ENGLISH")
                         .param("reason", "Need a live operator."))
                 .andExpect(status().isForbidden());
+
+        UUID escalationId = UUID.fromString(
+                objectMapper.readTree(escalationResult.getResponse().getContentAsString()).get("id").asText());
+        UUID adminId = userRepository.findByEmail(email).orElseThrow().getId();
+        UUID forgedOperatorId = UUID.randomUUID();
+        mockMvc.perform(post("/api/ivr/escalations/{id}/accept", escalationId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .param("operatorId", forgedOperatorId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.assignedOperatorId").value(adminId.toString()));
     }
 
     private void register(String email, String password) throws Exception {

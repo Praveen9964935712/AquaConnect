@@ -50,9 +50,10 @@ public class IvrGatewayController {
             @RequestHeader(value = "X-IVR-Caller-Id", required = false) String callerIdentifier,
             @Valid @RequestBody StartIvrSessionRequest request) {
         validateTrust(trustToken, callerIdentifier);
-        String effectiveCaller = request.callerIdentifier() == null || request.callerIdentifier().isBlank()
-                ? callerIdentifier : request.callerIdentifier();
-        return sessionService.start(effectiveCaller);
+        if (request.callerIdentifier() != null && !callerIdentifier.equals(request.callerIdentifier())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Caller identifier must match trusted caller");
+        }
+        return sessionService.start(callerIdentifier);
     }
 
     @GetMapping("/gateway/sessions/{id}")

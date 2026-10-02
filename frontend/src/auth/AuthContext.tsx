@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
+import { SESSION_EXPIRED_EVENT } from '../api/client';
 import { type AuthResponse, type Role } from '../types/auth';
 
 interface AuthContextValue {
@@ -8,6 +9,7 @@ interface AuthContextValue {
   login: (response: AuthResponse) => void;
   logout: () => void;
   isAuthenticated: boolean;
+  sessionExpired: boolean;
   hasRole: (role: Role) => boolean;
 }
 
@@ -15,6 +17,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('aquaconnect.jwt'));
+  const [sessionExpired, setSessionExpired] = useState(false);
   const [user, setUser] = useState<AuthContextValue['user'] | null>(() => {
     const raw = localStorage.getItem('aquaconnect.user');
     return raw ? JSON.parse(raw) : null;
@@ -36,20 +39,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
+  useEffect(() => {
+    const expireSession = () => {
+      setToken(null);
+      setUser(null);
+      setSessionExpired(true);
+    };
+    window.addEventListener(SESSION_EXPIRED_EVENT, expireSession);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, expireSession);
+  }, []);
+
   const value = useMemo<AuthContextValue>(() => ({
     token,
     user,
     isAuthenticated: Boolean(token && user),
+    sessionExpired,
     login: (response) => {
+      setSessionExpired(false);
       setToken(response.token);
       setUser({ id: response.userId, username: response.email, email: response.email, roles: response.roles });
     },
     logout: () => {
+      setSessionExpired(false);
       setToken(null);
       setUser(null);
     },
     hasRole: (role) => Boolean(user && user.roles.includes(role))
-  }), [token, user]);
+  }), [token, user, sessionExpired]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

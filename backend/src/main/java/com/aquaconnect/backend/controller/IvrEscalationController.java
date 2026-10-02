@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,8 +45,8 @@ public class IvrEscalationController {
     }
 
     @PostMapping("/escalations/{id}/accept")
-    public IvrEscalationRequest accept(@PathVariable UUID id, @RequestParam UUID operatorId) {
-        return escalationService.accept(id, operatorId);
+    public IvrEscalationRequest accept(@PathVariable UUID id, Authentication authentication) {
+        return escalationService.accept(id, UUID.fromString(authentication.getName()));
     }
 
     @PostMapping("/escalations/{id}/complete")

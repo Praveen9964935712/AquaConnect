@@ -8,6 +8,7 @@ import OperatorDashboardPage from './pages/OperatorDashboardPage';
 import ManagerDashboardPage from './pages/ManagerDashboardPage';
 import FieldEngineerDashboardPage from './pages/FieldEngineerDashboardPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import IvrSimulatorPage from './pages/IvrSimulatorPage';
 import ProtectedRoute from './routes/ProtectedRoute';
 
 export default function App() {
@@ -17,6 +18,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/ivr-simulator" element={<ProtectedRoute requiredRole="OPERATOR"><IvrSimulatorPage /></ProtectedRoute>} />
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route
             path="/citizen"

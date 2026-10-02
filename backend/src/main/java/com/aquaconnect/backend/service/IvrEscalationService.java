@@ -30,6 +30,9 @@ public class IvrEscalationService {
 
     @Transactional
     public IvrEscalationRequest create(UUID sessionId, String callerIdentifier, IvrLanguage language, String reason) {
+        if (reason == null || reason.isBlank() || reason.length() > 1000) {
+            throw new IllegalArgumentException("IVR escalation reason is invalid");
+        }
         var session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("IVR session not found"));
         requireActiveSession(session);
